@@ -1,0 +1,3 @@
+[submodule "lib/Servo"]
+	path = lib/Servo
+	url = https://github.com/arduino-libraries/Servo.git
