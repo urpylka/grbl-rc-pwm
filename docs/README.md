@@ -22,3 +22,5 @@ To make it easaly use `Makefile`.
 ```bash
 make upload
 ```
+
+Additional options you can find in `Makefile`.
