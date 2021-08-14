@@ -3,7 +3,6 @@
 Servo spindle;
 const byte interruptPin = 2;
 const byte spindlePwmPin = 3;
-int spindleOut = 0;
 
 // Initialize variables that will hold the timstamps of the rising and falling edges of the input PWM signal.
 // Since those are called from within the ISRs they should be volatile
