@@ -12,3 +12,11 @@ This project uses a cheap `Arduino Nano` to convert the 0-100% PWM coming out of
 Here's how to connect it. This schematic assumes that you have common GND for both GRBL arduino and the `Arduino Nano` used for this conversion:
 
 ![Schematic](./grbl-rc-pwm-schematic.jpg)
+
+## Build & upload
+
+To make it easaly use `Makefile`.
+
+```bash
+make upload
+```
