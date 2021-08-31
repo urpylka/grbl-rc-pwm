@@ -23,4 +23,4 @@ To make it easaly use `Makefile`.
 make upload
 ```
 
-Additional options you can find in `Makefile`.
+For some methods is used `Platformio`. Additional options you can find in `Makefile` and in `platformio.ini`.
