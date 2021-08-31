@@ -1,34 +1,59 @@
+#include <Arduino.h>
 #include <Servo.h>
 
 Servo spindle;
-const byte interruptPin = 2;
-const byte spindlePwmPin = 3;
 
-// Initialize variables that will hold the timstamps of the rising and falling edges of the input PWM signal.
+const byte interruptPin = 2;
+const byte spindlePwmPin = 4;
+
+// Default values are 1000-2000us
+// but you can adjust it personally
+const unsigned int minDuty = 900;
+const unsigned int maxDuty = 2000;
+const unsigned int period = 20000;
+
+// Initialize variables that will hold the timstamps
+// of the rising and falling edges of the input PWM signal.
 // Since those are called from within the ISRs they should be volatile
 volatile long lastHigh = 0;
 volatile long lastLow = 0;
 volatile long highLength = 0;
 volatile long lowLength = 0;
-volatile int saturation = 0;
+
+volatile float saturation = 0;
+
+unsigned long currentMicros = micros();
 
 void setup() {
-  pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(interruptPin), gohigh, RISING);
+  pinMode(interruptPin, INPUT);
   spindle.attach(spindlePwmPin);
+  attachInterrupt(digitalPinToInterrupt(interruptPin), gohigh, RISING);
 }
 
 void loop() {
-  spindle.write(saturation);
-  delay(10);
+
+  // Edge conditions
+  currentMicros = micros();
+  if (currentMicros - lastHigh > period) {
+    if (digitalRead(interruptPin) == HIGH) {
+      saturation = 1;
+    } else {
+      saturation = 0;
+    }
+  }
+
+  spindle.writeMicroseconds(minDuty + int(saturation * (maxDuty - minDuty)));
+  delay(2); // ms
 }
 
-// ISR functions are used to read the PWM signal more accurately. Those work reliably up to about 4KHz
+// ISR functions are used to read the PWM signal more accurately.
+// Those work reliably up to about 4KHz
 void golow() {
   attachInterrupt(digitalPinToInterrupt(interruptPin), gohigh, RISING);
   highLength = micros() - lastHigh;
   lastLow = micros();
-  saturation = (180 * highLength) / (lowLength + highLength);
+
+  saturation = float(highLength) / float(lowLength + highLength);
 }
 
 void gohigh() {
