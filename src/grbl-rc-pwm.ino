@@ -22,25 +22,51 @@ volatile long lowLength = 0;
 
 volatile float saturation = 0;
 
+boolean flag = false;
 unsigned long currentMicros = micros();
+unsigned long previousMillis = 0;
+
+void debug() {
+  unsigned long currentMillis = millis();
+  // Interval > 2sec
+  if (currentMillis - previousMillis >= 2000) {
+    previousMillis = currentMillis;
+
+    if (flag) Serial.println("in edge");
+
+    Serial.print("currentMicros: ");
+    Serial.println(currentMicros);
+    Serial.print("lastHigh:  ");
+    Serial.println(lastHigh);
+
+    Serial.print("saturation: ");
+    Serial.println(saturation);
+    Serial.print("ms: ");
+    Serial.println(minDuty + int(saturation * (maxDuty - minDuty)));
+  }
+}
 
 void setup() {
+  Serial.begin(115200);
   pinMode(interruptPin, INPUT);
   spindle.attach(spindlePwmPin);
   attachInterrupt(digitalPinToInterrupt(interruptPin), gohigh, RISING);
 }
 
 void loop() {
-
   // Edge conditions
   currentMicros = micros();
+  flag = false;
   if (currentMicros - lastHigh > period) {
     if (digitalRead(interruptPin) == HIGH) {
       saturation = 1;
     } else {
       saturation = 0;
     }
+    flag = true;
   }
+
+  debug();
 
   spindle.writeMicroseconds(minDuty + int(saturation * (maxDuty - minDuty)));
   delay(2); // ms
